@@ -1,0 +1,293 @@
+\title{''Raplh Spaccatutto''}
+
+\author{Enrico Cornacchia \\ Giulia Golesano \\ Giovanni Rinchiuso \\ Nikolai Zanni}
+\date{10 giugno 2024}
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+
+\chapter{Analisi}
+
+\section{Requisiti}
+
+Il progetto, a noi commissionato dall'università di Bologna, si pone l'obbiettivo di ricreare un videogioco basato sul classico e celebre arcade Ralph Spaccatutto, che rientra nella categoria dei giochi platformer, ossia dei giochi in cui la meccanica di gioco implica l'attraversamento di uno o piu livelli, ognuno dei quali composto da piattaforme solitamente situate su più piani.
+
+\subsection{Requisiti funzionali}
+
+\begin{itemize}
+	\item Un menu iniziale che permettera l’avvio di una partita e mostrera una breve legenda dei tasti, incluso anche un tasto quit per chiudere l’applicazione.
+	\item Il player durante il gioco potra muoversi in alto, in basso, a destra e a sinistra, lungo la griglia di gioco.
+	\item Il gioco implementerà le collisioni, tra le entità stesse e i barili.
+	\item Il gioco prevederà la creazione di power ups, positivi e negativi per il player.
+	\item Il gioco dovrà gestire la vittoria e la sconfitta.
+	\item Il gioco gestira la partita dell'utente all'interno di un livello, composto da piattaforme su piu piani; prevedera la presenza di un nemico (Ralph Spaccatutto), mattoni come ostacoli da schivare, npc player come finestre da aggiustare e il player Felix. 
+\end{itemize}
+
+
+\subsubsection{Requisiti non funzionali}
+\begin{itemize}
+	\item La grafica di gioco dovrà essere il piu coerente possibile all’originale, rimanendo pulita e non confusionaria.
+	\item L’interfaccia dovrà essere semplice ed intuitiva.
+	\item Si cercherà di offrire una certa fluidita durante il gioco e lo spostamento nel menu, cercando di ottimizzare le prestazioni.
+\end{itemize}
+
+\section{Analisi e modelli del dominio}
+Il gioco è composto da uno o più livelli, con una configurazione unica di piattaforme. 
+Il giocatore dovrà controllare Felix e l'obbiettivo sarà aggiustare tutte le finestre rotte da Ralph Spaccatutto.
+Il piano di gioco, ovvero la facciata di condominio su cui si trovano le finestre, è composto da più file di finestre, una base da cui parte il personaggio Felix e una cima su cui si trova l'antigonista Ralph.
+Durante la partita, Felix dovrà spostarsi nelle quatro direzioni ammesse ( su, giu, destra e sinistra ) con l'obbiettivo di raggiungere le finestre da aggiustare, schiavando nel frattempo i mattoni che Ralph continuerà a lanciare, fino al termine della partita. 
+Il giocatore avrà un numero limitato di vite, che gli permetteranno, decrementandosi, di ripartire dalla piattaforma di partenza dopo esser stato colpito. 
+Durante il gioco saranno disponibili power ups che il giocatore potrà raccogliere per ricevere aiuti extra.
+
+\begin{figure}[H]
+\includegraphics[width=1\textwidth]{img/analisi.png} 
+\centering{}
+\caption{Schema UML dell'analisi del problema, con rappresentate le entità principali ed i rapporti fra loro}
+\label{img:analisi}
+\end{figure}
+
+\chapter{Design}
+
+\section{Architettura}
+Per realizzare il progetto abbiamo adottato il pattern architetturale MVC (Model-View-Controller) cercando di mantenere il piu possibile divisi model view e controller. In particolare e composto da: il “model”, che gestisce la logica e i dati del gioco, ed e affidato a tutte le classi contenute all’interno dell’omonima cartella, nella quale e anche presente la parte di ECS che spiegheremo qui di seguito; la “view” che come si puo ben intendere gestisce la parte grafica e che in base allo stato di gioco (menu, playing, settings, win, death. . . ) disegnera la corretta finestra. Anch’essa e collocata all’interno dell’omonima cartella. Infine il “controller”, che ha il compito di interporsi tra model e view per permetterne la comunicazione. A tale scopo é stato creato un controller per ogni stato di gioco.
+Come accennato precedentemente, per la parte di model abbiamo scelto di adottare il pattern ECS (Entity-Component System). Ogni oggetto di gioco e un’entita caratterizzata dalla presenza o meno di uno o piu component, ognuno dei quali descrive uno specifico comportamento. Per esempio un’entità player possiede un MovementComponent che ne gestisce il movimento, ma il quale puo essere presente anche in un’altra entita. Questo ci permette di riutilizzare del codice eliminando possibili ripetizioni e rendendo il gioco più flessibile e facilmente estendibile.
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=1.25\textwidth]{img/architettura.png}
+\caption{Schema UML architetturale di DonkeyKong.}
+\label{img:architettura}
+\end{figure}
+
+\section{Design dettagliato}
+\subsection{Nikolai Zanni}
+
+\subsubsection{Implementazione del menù}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/menu.png}
+\caption{Rappresentazione UML della gestione MVC per il menu.}
+\end{figure}
+
+\paragraph{Problema:}
+Il gioco possiede un menù iniziale dal quale è possibile avviare una partita, modificare le impostazioni, scegliere un livello o uscire dal gioco.
+
+\paragraph{Soluzione:}
+Stati e View già caricati con l'esecuzione del gioco. Quando viene chiamato draw() all’interno della view saranno disegnati tutti gli elementi grafici dell’attuale stato di gioco, per esempio trovandoci nel menu, il background eccetera. Quando si ottiene un input che sia da mouse o da tastiera, in questo caso per ora solo il primo (il secondo `e messo in vista di implementazioni future) in base al bottone che viene premuto sar`a notificato al controller uno stato da applicare che sar`a passato al model e poi eseguito. In caso il bottone premuto fosse quello che poi ci porta all’inizio di una partita allora sar`a settato di default il livello uno, quello considerato iniziale, tramite le chiamate setLevel() e avviata la partita tramite startGame().
+
+\subsubsection{Scelta dei livelli}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/levels.png}
+\caption{Rappresentazione UML della gestione della scelta dei livelli.}
+\end{figure}
+
+\paragraph{Problema:}
+Nel menu di scelta dei livelli è possibile tornare al menu oppure scegliere un livello.
+
+\paragraph{Soluzione:}
+Come per il Menu, in questa schermata `e possibile iniziare una partita, la differenza risiede nel fatto che sono presenti quattro pulsanti diversi (escluso quello per tornare al menu che `e uguale in tutte le schermate) che ci permettono di iniziare quattro livelli unici. Quando la view riceve un punto premuto dal mouse, se `e stato premuto un pulsante che fa iniziare la partita, viene controllato quale deve essere impostato e inviato al menu. che tramite handleChoosenLevel(CurrentLevel level) lo passa al model che esegue il setLevel(CurrentLevel level). Notiamo in questo caso che a differenza del menu, i metodi sopra citati lavorano con un parametro CurrentLevel (enum per la gestione dei livelli) dato che abbiamo la scelta; ovviamente viene anche chiamato il metodo startGame().
+
+\subsubsection{Gestione del settings}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/settings.png}
+\caption{Rappresentazione UML della gestione del settings.}
+\end{figure}
+
+\paragraph{Problema:}
+Quando ci ritroviamo nella schermata delle impostazioni `e possibile tornare al menu, modificare l’audio disattivandolo o attivandolo e cambiare musica di sottofondo.
+
+\paragraph{Soluzione:}
+Prettamente simile a quella del Menu, ma con differenza che da questa schermata non ci `e permesso avviare una partita; semplicemente quando la view ricever`a un punto premuto dal mouse, se sar`a sopra un buttone verr`a applicato lo stato di riferimento, in caso della pressione dei pulsante di gestione audio, sar`a effettuata l’azione corretta.
+
+\subsubsection{Gestione della schermata finale e di pausa}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/end_stop.png}
+\caption{Rappresentazione UML della schermata finale e pausa.}
+\end{figure}
+
+\paragraph{Problema:}
+Nella schermata di pausa `e possibile ritornare al gioco menu, mentre in quella di fine, ovvero vittoria o sconfitta `e possibile ricominciare il livello da capo. In entrambe `e possibile tornare al menu.
+
+\paragraph{Soluzione:}
+Il pulsante per il Menu funziona come per le altre schermate, in questo caso durante lo sviluppo mi sono reso conto che le schermate erano praticamente tutte identiche, di conseguenza ho deciso di controllare lo stato in cui mi trovo all’interno del draw() in modo da visualizzare solo gli elementi grafici corrispondenti. Il metodo startGame() viene utilizzato quando ci si trova nella schermata di fine, mentre in quella di pausa si procede semplicemente riprendendo la partita in corso. Quando ci si trova nella schermata di pausa sono presenti le stesse impostazioni audio della schermata Settings, semplicmente in questa schermata potremo scegliere tra due musiche di gioco diverse da quelle di menù.
+
+
+
+\subsection{Cornacchia Enrico}
+
+\subsubsection{Gestione delle entità}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/entities.png}
+\caption{Rappresentazione UML dell'implementazione delle entità.}
+\end{figure}
+
+\paragraph{Problema:}
+Le entità sono una parte fondamentale se non il cuore del gioco, di conseguenza ne `e opportuna una gestione ottimale, soprattutto considerando il possibile e non raro caso in cui diverse entit`a possano avere un comportamento uguale o simile.
+
+\paragraph{Soluzione:}
+Per ovviare al problema della ripetizione di codice data da possibili comportamenti simili o uguali, `e stato utilizzato il Component Pattern. Ogni entit`a `e un egual guscio vuoto, al quale possiamo aggiungere component specifici o meno durante la creazione. Questo permette un’efficace gestione delle implementazioni delle entit`a rendendo modifiche, ulteriori implementazioni ed estensioni facilmente apportabili e riutilizzabili.
+
+\subsubsection{Gestione della creazione delle entità}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/create_entities.png}
+\caption{Rappresentazione UML della gestione della creazione delle entità.}
+\end{figure}
+
+\paragraph{Problema:}
+Sia all’inizio del gioco che durante, `e necessario creare diverse entità con diversi component in base ai comportamenti.
+
+\paragraph{Soluzione:}
+Il Factory Pattern ci fornisce un metodo centralizzato per la creazione di nuove istanze di entit`a, diverse e con component diversi in modo semplice e veloce. Questo ci offre diversi vantaggi, separa la logica di creazione delle entit`a dal resto dell’applicazione, rendendo il codice pi`u modulare e in caso futuro, di modificare la creazione, i parametri o i component di una o pi`u entit`a molto pi`u semplicemente. La factory pu`o prendere in ingresso parametri per la creazione di queste entit`a come per esempio la posizione.
+
+\subsubsection{Gestione dei power ups}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/power_ups.png}
+\caption{Rappresentazione UML della gestione dei power ups.}
+\end{figure}
+
+\paragraph{Problema:}
+Il giocatore deve poter usufruire di eventuali powerup sparsi per la mappa i quali forniscono potenziamenti. Anche i barili possono avere powerup, come il danno doppio.
+
+\paragraph{Soluzione:}
+Ho deciso di creare un component per ogni powerup, in modo da ottenere una gestione semplice, efficace e facilmente estendibile, ognuno di essi eredita update() da AbstractComponent sfruttando il Template MethodPattern. Ognuno di essi ha un metodo set e get: tramite il primo impostiamo lo stato del power up, il secondo ci ritorna lo stato stesso. Si nota che tra i power up presenti c’`e anche SlowComponent, il quale per`o non viene mai effettivamente utilizzato, questo perch`e `e stato inserito in vista futura. In ogni caso per poterlo utilizzare basterebbe semplicemente aggiungerlo ad un entità.
+
+
+
+
+\subsection{Golesano Giulia}
+
+\subsubsection{Gestione della schermata di gioco}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/game.png}
+\caption{Rappresentazione UML della gestione della schermata di gioco.}
+\end{figure}
+
+\paragraph{Problema:}
+Nella schermata di gioco oltre alla possibilit`a di mettere in pausa il gioco, `e necessario a differenza delle altre schermate che possiedono solo sfondi o immagini, caricare e visualizzare graficamente in modo corretto tutte le animazioni e tutti gli sprites.
+
+\paragraph{Soluzione:}
+Le animazioni sono gi`a caricate come detto in precedenza, poi la GameView tramite getIdle richiede al controller e successivamente al model gli index corretti dell’animazione da mostrare a display. Il metodo update() nella view ci permette di richiedere al controller un aggiornamento da parte del model updateAnimations() di tutti gli indici degli sprite in modo da avere ciclicamente diverse immagini per comporre le animazioni. La view quando viene creata instanzia un oggetto LevelImpl che crea il livello da giocare, `e stato inserito nella view dato che utilizzo librerie grafiche per caricare la mappa, mi avvalgo di una immagine pixel per pixel dove in base all’indice RGB, nel nostro caso rosso, ci permette di ottenere la posizione e il tipo di blocco presente. Tramite getLevelMap() si restituiscono solo i valori interi sia delle posizioni che dei blocchi, per poterli poi passare al gameplay al momento della creazione e inizializzare correttamente le entit`a del livello (per esempio blocco).
+
+\subsubsection{Gestione listener generici di input da tastiera e mouse}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/input.png}
+\caption{Rappresentazione UML della gestione listener generici di input da tastiera e mouse.}
+\end{figure}
+
+\paragraph{Problema:}
+Notificare le view quando avviene un mouse event o un key event.
+
+\paragraph{Soluzione:}
+Siccome ogni view pu`o ricevere gli stessi eventi, abbiamo deciso di creare due listener generici MouseInputs e KeyboardInputs. Essi vengono aggiunti alla classe ApplicationPanel, quando riceveranno un evento, in base allo stato di gioco, lo invieranno alla corretta view. Se `e un input da tastiera, sar`a inviato come codice intero, nell’altro caso, sar`a inviata una coppia di interi con le coordinate x e y del punto premuto dal mouse. Quando durante il gioco avviene la pressione di un tasto che corrisponde ad un movimento, sar`a notificato al GameController che si preoccuper`a di passarlo al Gameplay in modo tale da aggiungerlo alla lista di tasti premuti, da processare successivamente nell’input component. Utilizziamo una lista di tasti in modo da evitare ipotetici inconvenienti come la perdita di un tasto dovuto al lag.
+
+\subsubsection{Gestione degli input del player InputsComponent}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/input_components.png}
+\caption{Rappresentazione UML della gestione degli input del player InputsComponent.}
+\end{figure}
+
+\paragraph{Problema:}
+Durante il gioco `e necessario aggiornare gli input da tastiera per poter far muovere il nostro player.
+
+\paragraph{Soluzione:}
+Siccome ogni view pu`o ricevere gli stessi eventi, abbiamo deciso di creare due listener generici MouseInputs e KeyboardInputs. Essi vengono aggiunti alla classe ApplicationPanel, quando riceveranno un evento, in base allo stato di gioco, lo invieranno alla corretta view. Se `e un input da tastiera, sar`a inviato come codice intero, nell’altro caso, sar`a inviata una coppia di interi con le coordinate x e y del punto premuto dal mouse. Quando durante il gioco avviene la pressione di un tasto che corrisponde ad un movimento, sar`a notificato al GameController che si preoccuper`a di passarlo al Gameplay in modo tale da aggiungerlo alla lista di tasti premuti, da processare successivamente nell’input component. Utilizziamo una lista di tasti in modo da evitare ipotetici inconvenienti come la perdita di un tasto dovuto al lag.
+
+\subsubsection{Gestione delle collisioni}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/collision.png}
+\caption{Rappresentazione UML della gestione delle collisioni.}
+\end{figure}
+
+\paragraph{Problema:}
+Il gioco obbligatoriamente deve gestire le varie collisioni tra entit`a o con i bordi del livello.
+
+\paragraph{Soluzione:}
+Studiando il problema mi sono reso conto che un’ottima soluzione per il controllo delle collisioni fosse predisporre ogni Entit`a di una hitbox, un oggetto Rectangle che possiede un metodo che mi permette di sapere quando due di essi collidono. Utilizzo il Template Method Pattern, eredito update() da AbstractComponent, che ad ogni richiamo controlla se la relativa entit`a `e in collisione con un’altra gestendone le conseguenze.
+
+
+
+
+
+
+\subsection{Rinchiuso Giovanni}
+
+\subsubsection{Gestione del GameEngine}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/gameloop.jpg}
+\caption{Rappresentazione UML del game engine.}
+\end{figure}
+
+\paragraph{Problema} Il gioco deve essere in grado di permettere un gameplay fluido senza lag, aggiornando ciclicamente la grafica (view) e la logica di gioco (model) in contemporanea.
+
+\paragraph{Soluzione} Ho deciso di scorporare la gestione del game loop dal controller principale (Application) implementando un’interfaccia GameEngine, al fine di evitare la condivisione di codice sensibile e garantire una maggiore indipendenza, permettendo così di estendere anche in altre classi, in caso di bisogno, il motore del gioco. Il GameEngine viene fatto partire all’avvio dell’applicazione dal controller, richiamando il metodo mainLoop(), nucleo vero e proprio del game che gestisce il ciclo e fa in modo che non si verifichino perdite di frame. Tuttavia, durante lo sviluppo, mi son reso conto che è necessario aggiornare la parte di model e gestione delle varie entità solo nel caso in cui si stia effettivamente giocando; per questa ragione il suddetto metodo prevede che nel caso in cui ci si trovi nel menù iniziale, di pausa, o finale (vittoria o sconfitta), venga aggiornata solo la grafica e non la logica di gioco, risparmiando memoria e processi inutili.
+
+\subsubsection{Gestione di inizio gioco}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/game_start.jpg}
+\caption{Rappresentazione UML della logica di inizio gioco.}
+\end{figure}
+
+\paragraph{Problema} Avviare una partita in maniera totalmente indipendente ed efficace in qualunque momento e stato dell’applicazione
+
+\paragraph{Soluzione} Per permettere che una nuova partita possa essere sempre iniziata quando viene cliccato il tasto “Play”, ho implementato nel controller principale Application un metodo startGame(). Esso va a creare un nuovo GameController, che si occupa a sua volta di creare un nuovo Gameplay. Attraverso il metodo initializeGame() di quest’ultimo, verranno poi inizializzate tutte le istanze necessarie affinchè si possa giocare una partita.
+
+\subsubsection{Gestione di fine gioco}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/gameplay.jpg}
+\caption{Rappresentazione UML della logica di fine gioco.}
+\end{figure}
+
+\paragraph{Problema} Controllare che il giocatore abbia perso o vinto una partita.
+
+\paragraph{Soluzione} Per fare in modo che fosse verificata la condizione di vittoria e sconfitta e fosse aggiornato il Gamestate, ho utilizzato un metodo update() all’interno del controller di gioco, che viene eseguito ad ogni ciclo. Questo verifica la condizione di vittoria o sconfitta; se la partita è terminata, aggiorna solamente la grafica senza aggiornare le entità. Per fare ciò, richiama i metodi del gameplay checkIsOver(), isOver(), e setIsWin(). I primi due verificano che esista ancora un player nella lista delle entità di gioco: nel caso non esistesse, cambia il Gamestate in Death e fermano il timer di gioco. Il terzo, è un metodo che viene richiamato all’interno delle Collision quando l’entità del player va a collidere con la principessa, e setta il Gamestate a Win (fermando anch’esso il timer di gioco).
+
+\subsubsection{Gestione dei mattoni}
+
+\begin{figure}[H]
+\centering{}
+\includegraphics[width=\textwidth]{img/throw.jpg}
+\caption{Rappresentazione UML della logica di spawn dei barili.}
+\end{figure}
+
+\paragraph{Problema} Gestione dello spawn dei mattoni durante la partita.
+
+\paragraph{Soluzione} Per gestire la generazione delle entità mattoni durante la partita da parte del nemico (Donkey Kong), ho implementato un Component da associare esso, sfruttando così il Template Method Pattern, ereditando update() da AbstractComponent. Questo verifica se DK si trova in uno stato di congelamento per via di un powerup, e quindi se non deve generare barili, o se al contrario gli è concesso lanciare gli ostacoli.
+
+\chapter{Sviluppo}
+\section{Testing automatizzato}
+\section{Metodologie di lavoro}
+\section{Note di sviluppo}
+
+\chapter{Guida Utente}
+
+
