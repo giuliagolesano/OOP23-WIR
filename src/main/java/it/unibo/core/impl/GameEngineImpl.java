@@ -13,14 +13,15 @@ public class GameEngineImpl implements GameEngine {
     private GameController gameController;
     private InputManager inputManager;
 
-
-
-
-    @Override
-    public void GameEngineImpl() {
+    public GameEngineImpl() {
         period = 10;
         gameController = new GameController();
         inputManager = new InputManager();
+    }
+
+    @Override
+    public void mainLoop() {
+        // TODO Auto-generated method stub 
     }
 
     @Override
@@ -37,11 +38,6 @@ public class GameEngineImpl implements GameEngine {
         
     }
 
-    @Override
-    public void mainLoop() {
-        
-        
-    }
 
     @Override
     public void processInput() {
@@ -55,4 +51,3 @@ public class GameEngineImpl implements GameEngine {
         throw new UnsupportedOperationException("Unimplemented method 'WaitForNextFrame'");
     }
 }
-```
