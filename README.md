@@ -15,7 +15,8 @@ I comandi di gioco sono i seguenti:
 - **W** o **↑**: Salto al piano superiore.
 - **A** o **←**: Movimento verso sinistra.
 - **S** o **↓**: Discesa al piano inferiore.
-- **D** o **→**: movimento verso destra.
+- **D** o **→**: Movimento verso destra.
+- **Z**: Aggiustamento finestra. 
 
 I power-ups sono i seguenti:
 - **Cake**: rende invincibili per 3 secondi.
