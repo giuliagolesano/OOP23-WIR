@@ -10,6 +10,7 @@ import javafx.application.Application;
 
 public final class App {
     private App() { }
+    char prova;
 
     /**
      * Main application entry-point.
