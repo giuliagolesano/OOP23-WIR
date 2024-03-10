@@ -18,29 +18,32 @@ Il progetto, a noi commissionato dall'università di Bologna, si pone l'obbietti
 \subsection{Requisiti funzionali}
 
 \begin{itemize}
-	\item Un menu iniziale che permettera l’avvio di una partita e mostrera una breve legenda dei tasti, incluso anche un tasto quit per chiudere l’applicazione.
-	\item Il player durante il gioco potra muoversi in alto, in basso, a destra e a sinistra, lungo la griglia di gioco.
-	\item Il gioco implementerà le collisioni, tra le entità stesse e i barili.
-	\item Il gioco prevederà la creazione di power ups, positivi e negativi per il player.
-	\item Il gioco dovrà gestire la vittoria e la sconfitta.
-	\item Il gioco gestira la partita dell'utente all'interno di un livello, composto da piattaforme su piu piani; prevedera la presenza di un nemico (Ralph Spaccatutto), mattoni come ostacoli da schivare, npc player come finestre da aggiustare e il player Felix. 
+
+
+	//SPIEGA MEGLIO COME FUNZIONA IL GIOCO
+	\item Felix, il protagonista del gioco, avrà l'obiettivo di aggiustare tutte le finestra del condominio rotte dall'antagonista Ralph. 
+	\item Per arrivare a tale scopo, potrà muoversi a destra e a sinistra lungo ogni piattaforma, che rappresenta un piano del condominio, per poi salire o scendere agli altri piani.
+	\item Una complicazione che incontrerà il protagonista sono i mattoni che durante tutta la partita Ralph lancerà dalla sua piattaforma in cima al condominio, che Felix quindi dovrà schivare per non perdere le sue 3 vite a dispozione.
+	\item Degli aiuti che potrà ottenere sono invece i power ups che gli potranno garantire invincibilità per qualche secondo.
+	\item I nostri requisiti funzionali prevedono, oltre al corretto funziamento del gioco, un menù iniziale da cui selezionare l'avvio, la pausa o l'arresto del gioco, tramite appositi tasti e la gestione delle condizioni di vittoria e sconfitta.
+	LIVELLI ??
 \end{itemize}
 
 
 \subsubsection{Requisiti non funzionali}
 \begin{itemize}
-	\item La grafica di gioco dovrà essere il piu coerente possibile all’originale, rimanendo pulita e non confusionaria.
-	\item L’interfaccia dovrà essere semplice ed intuitiva.
-	\item Si cercherà di offrire una certa fluidita durante il gioco e lo spostamento nel menu, cercando di ottimizzare le prestazioni.
+	\item Ci poniamo l'obiettivo di fornire un'esperienza di gioco il più fluida possibile, restando sempre fedeli alla versione originale nonostante le nostre rivisitazioni.
 \end{itemize}
 
 \section{Analisi e modelli del dominio}
-Il gioco è composto da uno o più livelli, con una configurazione unica di piattaforme. 
-Il giocatore dovrà controllare Felix e l'obbiettivo sarà aggiustare tutte le finestre rotte da Ralph Spaccatutto.
-Il piano di gioco, ovvero la facciata di condominio su cui si trovano le finestre, è composto da più file di finestre, una base da cui parte il personaggio Felix e una cima su cui si trova l'antigonista Ralph.
-Durante la partita, Felix dovrà spostarsi nelle quatro direzioni ammesse ( su, giu, destra e sinistra ) con l'obbiettivo di raggiungere le finestre da aggiustare, schiavando nel frattempo i mattoni che Ralph continuerà a lanciare, fino al termine della partita. 
-Il giocatore avrà un numero limitato di vite, che gli permetteranno, decrementandosi, di ripartire dalla piattaforma di partenza dopo esser stato colpito. 
-Durante il gioco saranno disponibili power ups che il giocatore potrà raccogliere per ricevere aiuti extra.
+//AGGIUNGERE SCALE
+La schermata di gioco è composta da una facciata di condominio, simile ad una griglia, in cui si trovano, in base alla difficoltà del livello, un numero variabile di file di finestre, per ognuno dei piani del condominio.
+Come anticipatamente spiegato, il player Felix dovrà aggiustare tutte le finestre schivando i mattoni lanciati da Ralph, per vincere la partita.
+Per farlo, dovrà fermarsi, davanti alla finestra che desidera aggiustare, e tenere premuto il BACKSPACE per 1.5 secondi. 
+Per muoversi tra i piani avrà a disposizione le 4 direzioni UP, DOWN, LEFT e RIGHT, ognuna svolta dall'apposita freccina della tastiera. 
+Felix avrà un numero limitato di vite, che di default sarà 3, che potrà perdere se colpito da uno dei mattoni lanciati da Ralph, con successivo ritorno alla piattaforma di partenza, senza che si annullino i progressi della partita.
+Durante il gioco saranno possibili power ups che permetteranno a Felix di ricevere aiuti extra.
+
 
 \begin{figure}[H]
 \includegraphics[width=1\textwidth]{img/analisi.png} 
@@ -52,8 +55,9 @@ Durante il gioco saranno disponibili power ups che il giocatore potrà raccoglie
 \chapter{Design}
 
 \section{Architettura}
-Per realizzare il progetto abbiamo adottato il pattern architetturale MVC (Model-View-Controller) cercando di mantenere il piu possibile divisi model view e controller. In particolare e composto da: il “model”, che gestisce la logica e i dati del gioco, ed e affidato a tutte le classi contenute all’interno dell’omonima cartella, nella quale e anche presente la parte di ECS che spiegheremo qui di seguito; la “view” che come si puo ben intendere gestisce la parte grafica e che in base allo stato di gioco (menu, playing, settings, win, death. . . ) disegnera la corretta finestra. Anch’essa e collocata all’interno dell’omonima cartella. Infine il “controller”, che ha il compito di interporsi tra model e view per permetterne la comunicazione. A tale scopo é stato creato un controller per ogni stato di gioco.
-Come accennato precedentemente, per la parte di model abbiamo scelto di adottare il pattern ECS (Entity-Component System). Ogni oggetto di gioco e un’entita caratterizzata dalla presenza o meno di uno o piu component, ognuno dei quali descrive uno specifico comportamento. Per esempio un’entità player possiede un MovementComponent che ne gestisce il movimento, ma il quale puo essere presente anche in un’altra entita. Questo ci permette di riutilizzare del codice eliminando possibili ripetizioni e rendendo il gioco più flessibile e facilmente estendibile.
+Per realizzare il progetto abbiamo adottato il pattern architetturale MVC (Model-View-Controller) rispettando il più possibile tale suddivisione. 
+Ogni suddivisione gestisce una parte diversa: "model” gestisce la logica e i dati del gioco, “view” gestisce la parte grafica, che in base allo stato di gioco (menu, playing, settings, win, death. . . ) disegnera la corretta finestra, infine “controller” ha il compito di interporsi tra model e view per permetterne la comunicazione. 
+Abbiamo inoltre scelto di adottare il pattern ECS (Entity-Component System) per la parte di Model, in particolare ogni oggetto di gioco é un’entita che può essere composta da component, ognuno dei quali descrive uno specifico comportamento. 
 
 \begin{figure}[H]
 \centering{}
