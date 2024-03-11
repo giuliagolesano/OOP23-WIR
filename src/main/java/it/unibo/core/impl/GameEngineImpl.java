@@ -51,19 +51,19 @@ public class GameEngineImpl implements GameEngine {
     @Override
     public void update() {
         switch(inputManager.getInput()) {
-            case "UP":
+            case 0:
                 gameController.moveUp();
                 break;
-            case "DOWN":
+            case 1:
                 gameController.moveDown();
                 break;
-            case "LEFT":
+            case 2:
                 gameController.moveLeft();
                 break;
-            case "RIGHT":
+            case 3:
                 gameController.moveRight();
                 break;
-            case "SPACE":
+            case 4:
                 gameController.fix();
                 break;
             default:
