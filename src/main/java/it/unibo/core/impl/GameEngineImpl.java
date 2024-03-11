@@ -6,6 +6,7 @@ import it.unibo.controller.InputManager;
 
 
 
+
 public class GameEngineImpl implements GameEngine {
 
     //period to update the game
@@ -21,12 +22,55 @@ public class GameEngineImpl implements GameEngine {
 
     @Override
     public void mainLoop() {
-        // TODO Auto-generated method stub 
+        long current=System.currentTimeMillis();
+        while(System.currentTimeMillis() - current < this.period){
+            this.update();
+            this.draw();
+        }
+
     }
+
+    public void draw() {
+        int gamestate = gameController.getState();
+        switch(gamestate) {
+            case 0:
+                //draw game
+                break;
+            case 1:
+                //draw game over
+                break;
+            case 2:
+                //draw game win
+                break;
+            default:
+                break;
+        }
+    }
+
 
     @Override
     public void update() {
-        // TODO Auto-generated method stub
+        switch(inputManager.getInput()) {
+            case "UP":
+                gameController.moveUp();
+                break;
+            case "DOWN":
+                gameController.moveDown();
+                break;
+            case "LEFT":
+                gameController.moveLeft();
+                break;
+            case "RIGHT":
+                gameController.moveRight();
+                break;
+            case "SPACE":
+                gameController.fix();
+                break;
+            default:
+                break;
+        
+        };
+
         
     }
 
@@ -39,12 +83,7 @@ public class GameEngineImpl implements GameEngine {
     }
 
 
-    @Override
-    public void processInput() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'processInput'");
-    }
-
+   
     @Override
     public void WaitForNextFrame() {
         // TODO Auto-generated method stub

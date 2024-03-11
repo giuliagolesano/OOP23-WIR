@@ -6,8 +6,6 @@ public interface GameEngine {
 
     void update();
 
-    void processInput();
-
     void WaitForNextFrame();
     
     void cleanup();
