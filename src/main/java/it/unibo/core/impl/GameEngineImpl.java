@@ -2,7 +2,6 @@ package it.unibo.core.impl;
 
 import it.unibo.core.api.GameEngine;
 import it.unibo.controller.GameController;
-import it.unibo.controller.InputManager;
 
 
 
@@ -12,12 +11,10 @@ public class GameEngineImpl implements GameEngine {
     //period to update the game
     private int period;
     private GameController gameController;
-    private InputManager inputManager;
 
     public GameEngineImpl() {
         period = 10;
         gameController = new GameController();
-        inputManager = new InputManager();
     }
 
     @Override
@@ -34,13 +31,19 @@ public class GameEngineImpl implements GameEngine {
         int gamestate = gameController.getState();
         switch(gamestate) {
             case 0:
-                //draw game
+                //draw preview
                 break;
             case 1:
-                //draw game over
+                //draw settingsview
                 break;
             case 2:
-                //draw game win
+                //draw game
+                break;
+            case 3:
+                //draw pause
+                break;
+            case 4:
+                //draw endgame
                 break;
             default:
                 break;
@@ -50,28 +53,7 @@ public class GameEngineImpl implements GameEngine {
 
     @Override
     public void update() {
-        switch(inputManager.getInput()) {
-            case 0:
-                gameController.moveUp();
-                break;
-            case 1:
-                gameController.moveDown();
-                break;
-            case 2:
-                gameController.moveLeft();
-                break;
-            case 3:
-                gameController.moveRight();
-                break;
-            case 4:
-                gameController.fix();
-                break;
-            default:
-                break;
-        
-        };
-
-        
+        gameController.update();
     }
 
 
