@@ -18,6 +18,7 @@ public class GameEngineImpl implements GameEngine {
     }
 
     @Override
+    //the main loop of the game, every period the game is updated and drawn
     public void mainLoop() {
         long current=System.currentTimeMillis();
         while(System.currentTimeMillis() - current < this.period){
