@@ -1,5 +1,7 @@
 package it.unibo.controller;
 
+import it.unibo.utilities.GameState;
+
 public class GameController {
 
     private InputManager inputManager;
@@ -7,13 +9,6 @@ public class GameController {
     private FelixController felixController;
     private BrickController brickController;
     private CollisionManager collisionManager;
-    private int gamestate;
-
-
-    
-
-
-
 
 
     public GameController() {
@@ -22,13 +17,8 @@ public class GameController {
         felixController = new FelixController();
         brickController = new BrickController();
         collisionManager = new CollisionManager();
-        gamestate = 0;
     }
 
-
-    public int getState() {
-        return this.gamestate;
-    }
 
     public void readInput() {
         switch(inputManager.getInput()) {

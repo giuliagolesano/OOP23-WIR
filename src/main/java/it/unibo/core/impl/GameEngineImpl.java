@@ -2,6 +2,7 @@ package it.unibo.core.impl;
 
 import it.unibo.core.api.GameEngine;
 import it.unibo.controller.GameController;
+import it.unibo.utilities.GameState;
 
 
 
@@ -29,21 +30,20 @@ public class GameEngineImpl implements GameEngine {
     }
 
     public void draw() {
-        int gamestate = gameController.getState();
-        switch(gamestate) {
-            case 0:
+        switch(GameState.getGameState()) {
+            case HOME:
                 //draw preview
                 break;
-            case 1:
+            case PLAYING:
                 //draw settingsview
                 break;
-            case 2:
+            case PAUSED:
                 //draw game
                 break;
-            case 3:
+            case GAMEOVER:
                 //draw pause
                 break;
-            case 4:
+            case SETTINGS:
                 //draw endgame
                 break;
             default:
